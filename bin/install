@@ -5,21 +5,42 @@ currentDir="$(dirname $0)"
 source "${currentDir}/jq-downloader"
 source "${currentDir}/utils.sh"
 
+# shellcheck source=../lib/utils.sh
+. "$(dirname "$(dirname "$0")")/../../lib/utils.bash"
+# shellcheck source=lib/functions/versions.bash
+. "$(dirname "$(dirname "$0")")/../../lib/functions/versions.bash"
+
 install() {
 
   if [ "${ASDF_INSTALL_TYPE}" == "ref" ]; then
     echo "Only binary versions are supported"
     exit 1
   fi
-  
+
   local urlPrefix="${FLUTTER_STORAGE_BASE_URL}/flutter_infra_release/releases"
-  
+
   local versionListUrl="${FLUTTER_STORAGE_BASE_URL}/flutter_infra_release/releases/releases_macos.json"
-  
+
   if [ "$(uname -s)" == "Linux" ]; then
     versionListUrl="${FLUTTER_STORAGE_BASE_URL}/flutter_infra_release/releases/releases_linux.json"
   fi
-  
+
+  if [ "${ASDF_INSTALL_VERSION}" = "uptodate" ]; then
+    version=$(get_uptodate_version)
+
+    # check_if_version_exists should probably handle if either param is empty string
+    if [ -z "$version" ]; then
+      exit 1
+    fi
+
+    if ! (check_if_version_exists "flutter" "$version"); then
+      version_not_installed_text "flutter" "$version" 1>&2
+      exit 1
+    fi
+
+    ASDF_INSTALL_VERSION=$version
+  fi
+
   local escapedInstallVersion=$(echo $ASDF_INSTALL_VERSION | sed 's/\./\\\./g;s/\+/\\\+/g')
   local jsonResponse=$(curl -sL "${versionListUrl}" | "${JQ_BIN}" --arg VERSION "${escapedInstallVersion}" '.releases[] | select((.version + "-" + .channel) | test("^v?" + $VERSION))')
   local jsonResponseLength=$(echo "${jsonResponse}" | jq -s 'length')
@@ -45,6 +66,36 @@ install() {
   curl -OJL "${url}"
   tar xf "${fileName}" --strip 1
   rm -f "${fileName}"
+}
+
+get_uptodate_version() {
+  versions="$(. ${currentDir}/list-all)"
+
+  OLD_IFS="$IFS"
+  IFS=" " read -r -a versionInfo <<< "$versions"
+  IFS="$OLD_IFS"
+
+  min=0
+  max=$(( ${#versionInfo[@]} -1 ))
+
+  while [[ min -lt max ]]
+  do
+      # Swap current first and last elements
+      x="${versionInfo[$min]}"
+      versionInfo[$min]="${versionInfo[$max]}"
+      versionInfo[$max]="$x"
+
+      # Move closer
+      (( min++, max-- ))
+  done
+
+  if [ "${versionInfo[0]}" = "uptodate" ] && [ -n "${versionInfo[1]}" ]; then
+    version=$(latest_command "flutter" "${versionInfo[1]}")
+  elif [ "${versionInfo[0]}" = "latest" ] && [ -z "${versionInfo[1]}" ]; then
+    version=$(latest_command "flutter")
+  fi
+
+  echo $version
 }
 
 download_jq_if_not_exists

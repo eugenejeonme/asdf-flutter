@@ -25,18 +25,18 @@ install() {
     versionListUrl="${FLUTTER_STORAGE_BASE_URL}/flutter_infra_release/releases/releases_linux.json"
   fi
 
-  if [ "${ASDF_INSTALL_VERSION}" = "uptodate" ]; then
-    version=$(get_uptodate_version)
+  if [ "${ASDF_INSTALL_VERSION}" = "newest" ]; then
+    version=$(get_newest_version)
 
     # check_if_version_exists should probably handle if either param is empty string
     if [ -z "$version" ]; then
       exit 1
     fi
 
-    if ! (check_if_version_exists "flutter" "$version"); then
-      version_not_installed_text "flutter" "$version" 1>&2
-      exit 1
-    fi
+    # if ! (check_if_version_exists "flutter" "$version"); then
+    #   version_not_installed_text "flutter" "$version" 1>&2
+    #   exit 1
+    # fi
 
     ASDF_INSTALL_VERSION=$version
   fi
@@ -68,7 +68,7 @@ install() {
   rm -f "${fileName}"
 }
 
-get_uptodate_version() {
+get_newest_version() {
   versions="$(. ${currentDir}/list-all)"
 
   OLD_IFS="$IFS"
@@ -89,7 +89,7 @@ get_uptodate_version() {
       (( min++, max-- ))
   done
 
-  if [ "${versionInfo[0]}" = "uptodate" ] && [ -n "${versionInfo[1]}" ]; then
+  if [ "${versionInfo[0]}" = "newest" ] && [ -n "${versionInfo[1]}" ]; then
     version=$(latest_command "flutter" "${versionInfo[1]}")
   elif [ "${versionInfo[0]}" = "latest" ] && [ -z "${versionInfo[1]}" ]; then
     version=$(latest_command "flutter")

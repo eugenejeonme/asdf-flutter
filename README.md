@@ -8,9 +8,9 @@
 asdf plugin-add flutter https://github.com/eugenejeonme/asdf-flutter.git
 ```
 
-## Up to date (latest / newest)
+## Newest (latest / up to date)
 
-If you want to keep Flutter up to date, you can install it as an "uptodate" version.
+If you want to keep Flutter newest(latest) version, you can install it as an "newest" version.
 After installation, you can run  `flutter upgrade`.
 
 ## Configure

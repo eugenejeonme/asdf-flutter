@@ -8,9 +8,14 @@
 asdf plugin-add flutter https://github.com/eugenejeonme/asdf-flutter.git
 ```
 
-## Newest (latest / up to date)
+## Latest Stable Version
 
-If you want to keep Flutter newest(latest) version, you can install it as an "newest" version.
+If you want to keep Flutter latest stable version, you can install it as an "stable" version.
+
+```
+asdf install flutter stable
+```
+
 After installation, you can run  `flutter upgrade`.
 
 ## Configure

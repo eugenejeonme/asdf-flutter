@@ -26,7 +26,12 @@ install() {
   fi
 
   if [ "${ASDF_INSTALL_VERSION}" = "stable" ]; then
-    version=$(get_stable_version)
+    #version=$(get_stable_version)
+    version_1=$(get_stable_version)
+
+    echo $version_1
+
+    version=''
 
     # check_if_version_exists should probably handle if either param is empty string
     if [ -z "$version" ]; then
@@ -90,7 +95,9 @@ get_stable_version() {
   done
 
   if [ "${versionInfo[0]}" = "stable" ] && [ -n "${versionInfo[1]}" ]; then
-    version=$(latest_command "flutter" "${versionInfo[1]}")
+    # latest_command 업데이트로 코드 변경
+    # version=$(latest_command "flutter" "${versionInfo[1]}")
+    version=$(latest_command "flutter")
   elif [ "${versionInfo[0]}" = "latest" ] && [ -z "${versionInfo[1]}" ]; then
     version=$(latest_command "flutter")
   fi

@@ -33,6 +33,12 @@ To fix the "Could not find a Flutter SDK" error, you can set the `FLUTTER_ROOT` 
 export FLUTTER_ROOT="$(asdf where flutter)"
 ```
 
+or with `OH MY ZSH`
+```bash
+ASDF="$HOME/.asdf/bin/asdf"
+export FLUTTER_ROOT="$($ASDF where flutter)"
+```
+
 ### Bad CPU type in executable
 
 Because this plugin uses [jq](https://github.com/stedolan/jq) you have to enable [Rosetta](https://support.apple.com/en-us/HT211861) to be able to execute non arm optimized software.

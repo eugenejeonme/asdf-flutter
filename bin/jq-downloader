@@ -9,7 +9,7 @@ get_jq_filename() {
   Darwin)
     case "$(uname -m)" in
     x86_64) echo jq-osx-amd64 ;;
-    arm64) echo jq-osx-amd64 ;;
+    arm64) echo jq-osx-arm64 ;;
     esac ;;
   esac
 }
@@ -19,7 +19,14 @@ download_jq_if_not_exists() {
   jq_path="$(type -p jq || echo ${currentDir}/jq)"
 
   if [[ -z "$(type -p ${jq_path})" ]]; then
-    curl -sL "https://github.com/stedolan/jq/releases/latest/download/$(get_jq_filename)" -o "${jq_path}"
+    jq_file_name="$(get_jq_filename)"
+
+    if [ "${jq_file_name}" = "jq-osx-arm64" ]; then
+      curl -sL "https://github.com/ciiqr/jq-macos-arm/releases/download/v-369f7a9/jq" -o "${jq_path}"
+    else
+      curl -sL "https://github.com/stedolan/jq/releases/latest/download/$(get_jq_filename)" -o "${jq_path}"
+    fi
+
     chmod +x "${jq_path}"
   fi
 

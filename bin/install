@@ -26,12 +26,7 @@ install() {
   fi
 
   if [ "${ASDF_INSTALL_VERSION}" = "stable" ]; then
-    #version=$(get_stable_version)
-    version_1=$(get_stable_version)
-
-    echo $version_1
-
-    version=''
+    version=$(get_stable_version)
 
     # check_if_version_exists should probably handle if either param is empty string
     if [ -z "$version" ]; then

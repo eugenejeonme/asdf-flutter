@@ -2,38 +2,43 @@
 
 ${FLUTTER_STORAGE_BASE_URL:=https://storage.googleapis.com} > /dev/null 2>&1
 
-asdf_dir() {
-  if [ -z "$ASDF_DIR" ]; then
-    local current_script_path=${BASH_SOURCE[0]}
-    printf '%s\n' "$(
-      cd -- "$(dirname "$(dirname "$current_script_path")")" || exit
-      printf '%s\n' "$PWD"
-    )"
-  else
-    printf '%s\n' "$ASDF_DIR"
-  fi
-}
+latest_command() {
+  DEFAULT_QUERY="[0-9]"
 
-asdf_data_dir() {
-  local data_dir
+  local plugin_name=$1
+  local query=$2
+  local plugin_path
 
-  if [ -n "${ASDF_DATA_DIR}" ]; then
-    data_dir="${ASDF_DATA_DIR}"
-  elif [ -n "$HOME" ]; then
-    data_dir="$HOME/.asdf"
-  else
-    data_dir=$(asdf_dir)
+  if [ "$plugin_name" = "--all" ]; then
+    latest_all
   fi
 
-  printf "%s\n" "$data_dir"
-}
+  [[ -z $query ]] && query="$DEFAULT_QUERY"
 
-get_plugin_path() {
-  if [ -n "$1" ]; then
-    printf "%s\n" "$(asdf_data_dir)/plugins/$1"
+  plugin_path=$(get_plugin_path "$plugin_name")
+  check_if_plugin_exists "$plugin_name"
+
+  local versions
+
+  if [ -f "${plugin_path}/bin/latest-stable" ]; then
+    versions=$("${plugin_path}"/bin/latest-stable "$query")
+    if [ -z "${versions}" ]; then
+      # this branch requires this print to mimic the error from the list-all branch
+      printf "No compatible versions available (%s %s)\n" "$plugin_name" "$query" >&2
+      exit 1
+    fi
   else
-    printf "%s\n" "$(asdf_data_dir)/plugins"
+    # pattern from xxenv-latest (https://github.com/momo-lab/xxenv-latest)
+    versions=$(list_all_command "$plugin_name" "$query" |
+      grep -ivE "(^Available versions:|-src|-dev|-latest|-stm|[-\\.]rc|-milestone|-alpha|-beta|[-\\.]pre|-next|(a|b|c)[0-9]+|snapshot|master)" |
+      sed 's/^[[:space:]]\+//' |
+      tail -1)
+    if [ -z "${versions}" ]; then
+      exit 1
+    fi
   fi
+
+  printf "%s\n" "$versions"
 }
 
 latest_all() {
@@ -79,6 +84,40 @@ latest_all() {
     printf "%s\n" 'No plugins installed'
   fi
   exit 0
+}
+
+get_plugin_path() {
+  if [ -n "$1" ]; then
+    printf "%s\n" "$(asdf_data_dir)/plugins/$1"
+  else
+    printf "%s\n" "$(asdf_data_dir)/plugins"
+  fi
+}
+
+asdf_data_dir() {
+  local data_dir
+
+  if [ -n "${ASDF_DATA_DIR}" ]; then
+    data_dir="${ASDF_DATA_DIR}"
+  elif [ -n "$HOME" ]; then
+    data_dir="$HOME/.asdf"
+  else
+    data_dir=$(asdf_dir)
+  fi
+
+  printf "%s\n" "$data_dir"
+}
+
+asdf_dir() {
+  if [ -z "$ASDF_DIR" ]; then
+    local current_script_path=${BASH_SOURCE[0]}
+    printf '%s\n' "$(
+      cd -- "$(dirname "$(dirname "$current_script_path")")" || exit
+      printf '%s\n' "$PWD"
+    )"
+  else
+    printf '%s\n' "$ASDF_DIR"
+  fi
 }
 
 list_all_command() {

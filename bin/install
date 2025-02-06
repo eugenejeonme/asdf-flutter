@@ -5,10 +5,11 @@ currentDir="$(dirname $0)"
 source "${currentDir}/jq-downloader"
 source "${currentDir}/utils.sh"
 
-# shellcheck source=../lib/utils.sh
-. "$(dirname "$(dirname "$0")")/../../lib/utils.bash"
-# shellcheck source=lib/functions/versions.bash
-. "$(dirname "$(dirname "$0")")/../../lib/functions/versions.bash"
+## asdf 가 v0.16.0 버전 이후에는 go 로 컴파일 되면서, 아래 bash 는 더 이상 사용할 수 없게 되었다.
+## shellcheck source=../lib/utils.sh
+# . "$(dirname "$(dirname "$0")")/../../lib/utils.bash"
+## shellcheck source=lib/functions/versions.bash
+# . "$(dirname "$(dirname "$0")")/../../lib/functions/versions.bash"
 
 install() {
 
